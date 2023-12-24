@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>משחק תפיסת התפוחים!</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+
+    .bubble {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      background-size: cover;
+      cursor: pointer;
+    }
+
+    #score {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    #timer {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div id="score">ניקוד: 0</div>
+<div id="timer">זמן שנותר: 20s</div>
+
+<script>
+  const bubbleInterval = 1000; // Interval in milliseconds for creating new bubbles
+  const bubbleSpeed = 2; // Speed of bubble falling
+  const bubbleSize = 50; // Size of the bubble
+  const targetScore = 15; // Target number of apples to click
+  let score = 0;
+  let time = 20;
+
+  function createBubble() {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.style.left = `${Math.random() * (window.innerWidth - bubbleSize)}px`;
+    bubble.style.top = '0px'; // Start the bubble from the top
+    bubble.style.backgroundImage = 'url("apple.png")'; // Replace with the correct path to your apple image
+    document.body.appendChild(bubble);
+
+    bubble.addEventListener('click', () => {
+      score++;
+      updateScore();
+      document.body.removeChild(bubble);
+
+      if (score === targetScore) {
+        endGame(true); // Player won
+      }
+    });
+
+    setTimeout(() => {
+      document.body.removeChild(bubble);
+
+      if (score < targetScore) {
+        endGame(false); // Player lost
+      }
+    }, 5000); // Remove the bubble after 5 seconds
+
+    animateBubble(bubble);
+  }
+
+  function animateBubble(bubble) {
+    let positionY = 0;
+    const bubbleAnimation = setInterval(() => {
+      positionY += bubbleSpeed;
+      bubble.style.top = `${positionY}px`;
+
+      if (positionY > window.innerHeight) {
+        clearInterval(bubbleAnimation);
+        document.body.removeChild(bubble);
+      }
+    }, 16);
+  }
+
+  function updateScore() {
+    document.getElementById('score').textContent = `ניקוד: ${score}`;
+  }
+
+  function updateTimer() {
+    document.getElementById('timer').textContent = `זמן שנותר: ${time} שניות`;
+  }
+
+  function endGame(playerWon) {
+    clearInterval(bubbleGenerator); // Stop generating bubbles
+    clearInterval(timer); // Stop the timer
+
+    // Display the final score
+    const result = playerWon ? 'ניצחת!' : 'הפסדת!';
+    const playAgain = confirm(`המשחק נגמר!\n${result}\nהניקוד שלך: ${score}\nהאם תרצה לשחק שוב?`);
+    if (playAgain) {
+      resetGame();
+    }
+  }
+
+  function resetGame() {
+    score = 0;
+    time = 20;
+    updateScore();
+    updateTimer();
+    bubbleGenerator = setInterval(createBubble, bubbleInterval);
+    timer = setInterval(() => {
+      time--;
+      updateTimer();
+
+      if (time === 0) {
+        endGame(false); // Player lost
+      }
+    }, 1000);
+  }
+
+  // Set up the timer
+  const timerElement = document.getElementById('timer');
+  updateTimer();
+
+  let bubbleGenerator = setInterval(createBubble, bubbleInterval);
+  let timer = setInterval(() => {
+    time--;
+    updateTimer();
+
+    if (time === 0) {
+      endGame(false); // Player lost
+    }
+  }, 1000);
+
+</script>
+
+</body>
+</html>
